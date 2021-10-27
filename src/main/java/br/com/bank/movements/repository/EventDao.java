@@ -1,6 +1,8 @@
 package br.com.bank.movements.repository;
 
+import br.com.bank.movements.dto.Account;
 import br.com.bank.movements.dto.Event;
+import br.com.bank.movements.dto.EventResult;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -27,5 +29,10 @@ class EventDao implements EventRepository {
         var count = data.get(event.getDestination()).stream().count();
 
         return data.get(event.getDestination()).stream().skip(count - 1).findFirst().get();
+    }
+
+    @Override
+    public List<Event> listEventsByAccount(Integer accountId) {
+        return data.get(accountId);
     }
 }

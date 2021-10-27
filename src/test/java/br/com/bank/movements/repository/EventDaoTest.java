@@ -18,13 +18,13 @@ class EventDaoTest {
     @Test
     @DisplayName("should add a register of an event")
     void testAddAnEvent() {
-       var eventRepository = new EventDao(new HashMap<>());
+        var eventRepository = new EventDao(new HashMap<>());
 
         var fakeAccountId = 100;
         var fakeAmount = new BigDecimal(10);
-        var fakeEvent = new Event(EventType.DEPOSIT, fakeAccountId, fakeAmount);
+        var fakeEvent = new Event(EventType.DEPOSIT, fakeAccountId, null, fakeAmount);
 
-        var result = eventRepository.register(fakeEvent);
+        var result = eventRepository.register(fakeAccountId, fakeEvent);
 
         assertThat(100, equalTo(result.getDestination()));
         assertThat(new BigDecimal(10), equalTo(result.getAmount()));
@@ -33,13 +33,13 @@ class EventDaoTest {
     @Test
     @DisplayName("should listed the events of an account")
     void testGetAnEvent() {
+        var fakeAccountId = 100;
         var mockData = new HashMap<Integer, List<Event>>();
-        var mockEvent =  new Event(EventType.DEPOSIT, 100, BigDecimal.TEN);
+        var mockEvent = new Event(EventType.DEPOSIT, fakeAccountId, null, BigDecimal.TEN);
 
         mockData.put(100, Arrays.asList(mockEvent, mockEvent));
 
         var eventRepository = new EventDao(mockData);
-        var fakeAccountId = 100;
 
         var result = eventRepository.listEventsByAccount(fakeAccountId);
 

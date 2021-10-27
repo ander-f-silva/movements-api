@@ -12,7 +12,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,13 +28,18 @@ public class RegistrationEventTest {
         return Stream.of(
                 Arguments.of(new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), new EventResult(new Account(100, BigDecimal.TEN))),
                 Arguments.of(new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), new EventResult(new Account(100, new BigDecimal(20)))),
-                Arguments.of(new Event(EventType.WITHDRAW, null, 100, BigDecimal.TEN), new EventResult(new Account(100, new BigDecimal(15))))
+                Arguments.of(new Event(EventType.WITHDRAW, null, 100, new BigDecimal(5)), new EventResult(new Account(100, new BigDecimal(15))))
         );
     }
 
     @BeforeAll
     static void setUp() {
-        registrationEvent = new RegisterEvent(new DepositMovement(new MockEventRepository()));
+        var mockEventRepository = new MockEventRepository();
+        var movementOperation = new MovementOperationFactory(new DepositMovement(mockEventRepository), new WithdrawMovement(mockEventRepository), new HashMap<>());
+
+        movementOperation.init();
+
+        registrationEvent = new RegisterEvent(movementOperation);
     }
 
     @ParameterizedTest
@@ -48,17 +56,17 @@ public class RegistrationEventTest {
         private Map<Integer, List<Event>> mockData = new HashMap<>();
 
         @Override
-        public Event register(Event event) {
-           if (mockData.containsKey(event.getDestination()))  {
-               mockData.get(event.getDestination()).add(event);
-           } else {
-               var list = new ArrayList<Event>();
-               list.add(event);
+        public Event register(Integer accountId, Event event) {
+            if (mockData.containsKey(accountId)) {
+                mockData.get(accountId).add(event);
+            } else {
+                var list = new ArrayList<Event>();
+                list.add(event);
 
-               mockData.put(event.getDestination(), list);
-           }
+                mockData.put(accountId, list);
+            }
 
-           return event;
+            return event;
         }
 
         @Override

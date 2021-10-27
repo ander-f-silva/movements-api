@@ -5,27 +5,32 @@ import br.com.bank.movements.dto.Event;
 import br.com.bank.movements.dto.EventResult;
 import br.com.bank.movements.dto.EventType;
 import br.com.bank.movements.repository.EventRepository;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 public class RegistrationEventTest {
-    private RegistrationEvent registrationEvent = new RegisterEvent(new MockEventRepository());
+    private static RegistrationEvent registrationEvent;
 
     private static Stream<Arguments> registerEvents() {
         return Stream.of(
                 Arguments.of(new Event(EventType.DEPOSIT, 100, BigDecimal.TEN), new EventResult(new Account(100, BigDecimal.TEN))),
                 Arguments.of(new Event(EventType.DEPOSIT, 100, BigDecimal.TEN), new EventResult(new Account(100, new BigDecimal(20))))
         );
+    }
+
+    @BeforeAll
+    static void setUp() {
+        registrationEvent = new RegisterEvent(new MockEventRepository());
     }
 
     @ParameterizedTest
@@ -38,18 +43,26 @@ public class RegistrationEventTest {
         assertThat(expectedEventResult.getOrigin().getBalance(), equalTo(result.getOrigin().getBalance()));
     }
 
-    class MockEventRepository implements EventRepository {
-        private List<Event> mockData = new ArrayList<>();
+    static class MockEventRepository implements EventRepository {
+        private Map<Integer, List<Event>> mockData = new HashMap<>();
 
         @Override
         public Event register(Event event) {
-            mockData.add(event);
-            return event;
+           if (mockData.containsKey(event.getDestination()))  {
+               mockData.get(event.getDestination()).add(event);
+           } else {
+               var list = new ArrayList<Event>();
+               list.add(event);
+
+               mockData.put(event.getDestination(), list);
+           }
+
+           return event;
         }
 
         @Override
         public List<Event> listEventsByAccount(Integer id) {
-            return mockData;
+            return mockData.get(id);
         }
     }
 }

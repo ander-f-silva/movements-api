@@ -23,14 +23,15 @@ public class RegistrationEventTest {
 
     private static Stream<Arguments> registerEvents() {
         return Stream.of(
-                Arguments.of(new Event(EventType.DEPOSIT, 100, BigDecimal.TEN), new EventResult(new Account(100, BigDecimal.TEN))),
-                Arguments.of(new Event(EventType.DEPOSIT, 100, BigDecimal.TEN), new EventResult(new Account(100, new BigDecimal(20))))
+                Arguments.of(new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), new EventResult(new Account(100, BigDecimal.TEN))),
+                Arguments.of(new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), new EventResult(new Account(100, new BigDecimal(20)))),
+                Arguments.of(new Event(EventType.WITHDRAW, null, 100, BigDecimal.TEN), new EventResult(new Account(100, new BigDecimal(15))))
         );
     }
 
     @BeforeAll
     static void setUp() {
-        registrationEvent = new RegisterEvent(new MockEventRepository());
+        registrationEvent = new RegisterEvent(new DepositMovement(new MockEventRepository()));
     }
 
     @ParameterizedTest

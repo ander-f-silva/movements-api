@@ -7,22 +7,28 @@ import br.com.bank.movements.repository.EventRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 class WithdrawMovement implements MovementOperation {
     private final EventRepository eventRepository;
 
     @Override
-    public EventResult effect(final Event event) {
-        var withdrawEvent = Event.builder()
-                .origin(event.getOrigin())
-                .amount(event.getAmount().negate())
-                .build();
+    public Optional<EventResult> effect(final Event event) {
+       if(eventRepository.exists(event.getOrigin())) {
+           var withdrawEvent = Event.builder()
+                   .origin(event.getOrigin())
+                   .amount(event.getAmount().negate())
+                   .build();
 
-        eventRepository.register(withdrawEvent.getOrigin(), withdrawEvent);
+           eventRepository.register(withdrawEvent.getOrigin(), withdrawEvent);
 
-        var eventsOfTheAccount = eventRepository.listEventsByAccount(event.getOrigin());
+           var eventsOfTheAccount = eventRepository.listEventsByAccount(event.getOrigin());
 
-        return new EventResult(new Account(event.getOrigin(), Balance.calculate(eventsOfTheAccount)));
+           return Optional.of(new EventResult(new Account(event.getOrigin(), Balance.calculate(eventsOfTheAccount))));
+       } else {
+           return Optional.empty();
+       }
     }
 }

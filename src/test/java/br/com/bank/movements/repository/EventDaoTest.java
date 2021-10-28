@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 class EventDaoTest {
 
@@ -52,5 +53,31 @@ class EventDaoTest {
         assertThat(EventType.DEPOSIT, equalTo(result.get(1).getEventType()));
         assertThat(100, equalTo(result.get(1).getDestination()));
         assertThat(new BigDecimal(10), equalTo(result.get(1).getAmount()));
+    }
+
+    @Test
+    @DisplayName("should verify if event exist")
+    void testExistsAnEvent() {
+        var fakeAccountId = 100;
+        var mockData = new HashMap<Integer, List<Event>>();
+        var mockEvent = new Event(EventType.DEPOSIT, fakeAccountId, null, BigDecimal.TEN);
+
+        mockData.put(100, Arrays.asList(mockEvent, mockEvent));
+
+        var eventRepository = new EventDao(mockData);
+
+        var result = eventRepository.exists(fakeAccountId);
+
+        assertThat(true, is(result));
+    }
+
+    @Test
+    @DisplayName("should verify if not event exist")
+    void testNotExistsAnEvent() {
+        var eventRepository = new EventDao( new HashMap<>());
+
+        var result = eventRepository.exists(200);
+
+        assertThat(false, is(result));
     }
 }

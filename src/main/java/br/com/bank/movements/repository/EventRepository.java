@@ -8,4 +8,6 @@ public interface EventRepository {
     Event register(Integer accountId, Event event);
 
     List<Event> listEventsByAccount(Integer id);
+
+    boolean exists(Integer accountId);
 }

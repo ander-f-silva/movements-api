@@ -33,4 +33,9 @@ class EventDao implements EventRepository {
     public List<Event> listEventsByAccount(Integer accountId) {
         return data.get(accountId);
     }
+
+    @Override
+    public boolean exists(Integer accountId) {
+        return data.containsKey(accountId);
+    }
 }

@@ -1,8 +1,6 @@
 package br.com.bank.movements.repository;
 
-import br.com.bank.movements.dto.Account;
 import br.com.bank.movements.dto.Event;
-import br.com.bank.movements.dto.EventResult;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -16,23 +14,28 @@ class EventDao implements EventRepository {
     private Map<Integer, List<Event>> data;
 
     @Override
-    public Event register(Event event) {
-        if (data.containsKey(event.getDestination())) {
-            data.get(event.getDestination()).add(event);
+    public Event register(Integer accountId, Event event) {
+        if (data.containsKey(accountId)) {
+            data.get(accountId).add(event);
         } else {
             var registers = new LinkedList<Event>();
             registers.add(event);
 
-            data.put(event.getDestination(), registers);
+            data.put(accountId, registers);
         }
 
-        var count = data.get(event.getDestination()).stream().count();
+        var count = data.get(accountId).stream().count();
 
-        return data.get(event.getDestination()).stream().skip(count - 1).findFirst().get();
+        return data.get(accountId).stream().skip(count - 1).findFirst().get();
     }
 
     @Override
     public List<Event> listEventsByAccount(Integer accountId) {
         return data.get(accountId);
+    }
+
+    @Override
+    public boolean exists(Integer accountId) {
+        return data.containsKey(accountId);
     }
 }

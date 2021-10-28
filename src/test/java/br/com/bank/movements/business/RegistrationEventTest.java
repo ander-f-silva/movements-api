@@ -17,52 +17,69 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 public class RegistrationEventTest {
     private static RegistrationEvent registrationEvent;
 
     private static Stream<Arguments> registerEvents() {
         return Stream.of(
-                Arguments.of(new Event(EventType.DEPOSIT, 100, BigDecimal.TEN), new EventResult(new Account(100, BigDecimal.TEN))),
-                Arguments.of(new Event(EventType.DEPOSIT, 100, BigDecimal.TEN), new EventResult(new Account(100, new BigDecimal(20))))
+                Arguments.of("Create new account" , new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(new Account(100, BigDecimal.TEN)))),
+                Arguments.of("Take a new deposit", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN),  Optional.of(new EventResult(new Account(100, new BigDecimal(20))))),
+                Arguments.of("Withdraw the an account", new Event(EventType.WITHDRAW, null, 100, new BigDecimal(5)),  Optional.of(new EventResult(new Account(100, new BigDecimal(15))))),
+                Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, 200, new BigDecimal(5)), Optional.empty())
         );
     }
 
     @BeforeAll
     static void setUp() {
-        registrationEvent = new RegisterEvent(new MockEventRepository());
+        var mockEventRepository = new MockEventRepository();
+        var movementOperation = new MovementOperationFactory(new DepositMovement(mockEventRepository), new WithdrawMovement(mockEventRepository), new HashMap<>());
+
+        movementOperation.init();
+
+        registrationEvent = new RegisterEvent(movementOperation);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} {0}")
     @MethodSource("registerEvents")
     @DisplayName("should add an event")
-    void testAddAnEvent(Event fakeEvent, EventResult expectedEventResult) {
+    void testAddAnEvent(String title, Event fakeEvent, Optional<EventResult> expectedEventResult) {
         var result = registrationEvent.add(fakeEvent);
 
-        assertThat(expectedEventResult.getOrigin().getId(), equalTo(result.getOrigin().getId()));
-        assertThat(expectedEventResult.getOrigin().getBalance(), equalTo(result.getOrigin().getBalance()));
+        if (result.isPresent()) {
+            assertThat(expectedEventResult.get().getOrigin().getId(), equalTo(result.get().getOrigin().getId()));
+            assertThat(expectedEventResult.get().getOrigin().getBalance(), equalTo(result.get().getOrigin().getBalance()));
+        } else {
+            assertThat(expectedEventResult.isEmpty(), is(true));
+        }
     }
 
     static class MockEventRepository implements EventRepository {
         private Map<Integer, List<Event>> mockData = new HashMap<>();
 
         @Override
-        public Event register(Event event) {
-           if (mockData.containsKey(event.getDestination()))  {
-               mockData.get(event.getDestination()).add(event);
-           } else {
-               var list = new ArrayList<Event>();
-               list.add(event);
+        public Event register(Integer accountId, Event event) {
+            if (mockData.containsKey(accountId)) {
+                mockData.get(accountId).add(event);
+            } else {
+                var list = new ArrayList<Event>();
+                list.add(event);
 
-               mockData.put(event.getDestination(), list);
-           }
+                mockData.put(accountId, list);
+            }
 
-           return event;
+            return event;
         }
 
         @Override
         public List<Event> listEventsByAccount(Integer id) {
             return mockData.get(id);
+        }
+
+        @Override
+        public boolean exists(Integer accountId) {
+            return mockData.containsKey(accountId);
         }
     }
 }

@@ -27,10 +27,3 @@ jobs:
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
-
-      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
-        with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "movements-api" #Must be unique in Heroku
-          heroku_email: "infoander@gmail.com"
-          branch: "main"

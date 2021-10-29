@@ -1,6 +1,6 @@
 package br.com.bank.movements.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -9,8 +9,9 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public class EventResult {
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Account origin;
-    @JsonIgnore
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Account destination;
 }

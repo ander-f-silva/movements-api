@@ -5,9 +5,9 @@ import br.com.bank.movements.dto.Event;
 import java.util.List;
 
 public interface EventRepository {
-    Event register(Integer accountId, Event event);
+    Event register(String accountId, Event event);
 
-    List<Event> listEventsByAccount(Integer id);
+    List<Event> listEventsByAccount(String id);
 
-    boolean exists(Integer accountId);
+    boolean exists(String accountId);
 }

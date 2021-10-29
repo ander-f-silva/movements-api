@@ -11,10 +11,10 @@ import java.util.Map;
 @Repository
 @AllArgsConstructor
 class EventDao implements EventRepository {
-    private Map<Integer, List<Event>> data;
+    private Map<String, List<Event>> data;
 
     @Override
-    public Event register(Integer accountId, Event event) {
+    public Event register(String accountId, Event event) {
         if (data.containsKey(accountId)) {
             data.get(accountId).add(event);
         } else {
@@ -30,12 +30,12 @@ class EventDao implements EventRepository {
     }
 
     @Override
-    public List<Event> listEventsByAccount(Integer accountId) {
+    public List<Event> listEventsByAccount(String accountId) {
         return data.get(accountId);
     }
 
     @Override
-    public boolean exists(Integer accountId) {
+    public boolean exists(String accountId) {
         return data.containsKey(accountId);
     }
 }

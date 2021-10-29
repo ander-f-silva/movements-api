@@ -10,6 +10,6 @@ import java.math.BigDecimal;
 @ToString
 @AllArgsConstructor
 public class Account {
-    private Integer id;
+    private String id;
     private BigDecimal balance;
 }

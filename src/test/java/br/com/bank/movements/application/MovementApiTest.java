@@ -49,7 +49,7 @@ class MovementApiTest {
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         HttpEntity<Event> entity = new HttpEntity<>(newEvent, headers);
-        ResponseEntity<EventResult> response = restTemplate.postForEntity("http://localhost:" + port + "/movement-api/event", entity, EventResult.class);
+        ResponseEntity<EventResult> response = restTemplate.postForEntity("http://localhost:" + port + "/event", entity, EventResult.class);
 
         assertThat(response.getStatusCode(), Matchers.is(httpStatus));
 

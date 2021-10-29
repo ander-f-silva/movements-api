@@ -16,17 +16,21 @@ class TransferMovement implements MovementOperation {
 
     @Override
     public Optional<EventResult> effect(final Event event) {
-        var transferEventToAccountOrigin = Event.builder()
-                .origin(event.getOrigin())
-                .amount(event.getAmount().negate())
-                .build();
+        if(eventRepository.exists(event.getOrigin())) {
+            var transferEventToAccountOrigin = Event.builder()
+                    .origin(event.getOrigin())
+                    .amount(event.getAmount().negate())
+                    .build();
 
-        eventRepository.register(event.getOrigin(), transferEventToAccountOrigin);
-        eventRepository.register(event.getDestination(), event);
+            eventRepository.register(event.getOrigin(), transferEventToAccountOrigin);
+            eventRepository.register(event.getDestination(), event);
 
-        var eventsOfTheAccountOrigin = eventRepository.listEventsByAccount(transferEventToAccountOrigin.getOrigin());
-        var eventsOfTheAccountDestination = eventRepository.listEventsByAccount(event.getDestination());
+            var eventsOfTheAccountOrigin = eventRepository.listEventsByAccount(transferEventToAccountOrigin.getOrigin());
+            var eventsOfTheAccountDestination = eventRepository.listEventsByAccount(event.getDestination());
 
-        return Optional.of(new EventResult(new Account(event.getOrigin(), Balance.calculate(eventsOfTheAccountOrigin)), new Account(event.getDestination(), Balance.calculate(eventsOfTheAccountDestination))));
+            return Optional.of(new EventResult(new Account(event.getOrigin(), Balance.calculate(eventsOfTheAccountOrigin)), new Account(event.getDestination(), Balance.calculate(eventsOfTheAccountDestination))));
+        } else {
+            return Optional.empty();
+        }
     }
 }

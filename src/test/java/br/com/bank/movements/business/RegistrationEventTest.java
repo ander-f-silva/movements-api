@@ -25,10 +25,11 @@ public class RegistrationEventTest {
     private static Stream<Arguments> registerEvents() {
         return Stream.of(
                 Arguments.of("Create new account", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account(100, BigDecimal.TEN)))),
-                Arguments.of("Take a new deposit", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account(100, new BigDecimal(20))))),
+                Arguments.of("Does a new deposit", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account(100, new BigDecimal(20))))),
                 Arguments.of("Withdraw the an account", new Event(EventType.WITHDRAW, null, 100, new BigDecimal(5)), Optional.of(new EventResult(new Account(100, new BigDecimal(15)), null))),
                 Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, 200, new BigDecimal(5)), Optional.empty()),
-                Arguments.of("Transfer between two accounts", new Event(EventType.TRANSFER, 300, 100, new BigDecimal(15)), Optional.of(new EventResult(new Account(100, new BigDecimal(0)), new Account(300, new BigDecimal(15)))))
+                Arguments.of("Transfer between two accounts", new Event(EventType.TRANSFER, 300, 100, new BigDecimal(15)), Optional.of(new EventResult(new Account(100, new BigDecimal(0)), new Account(300, new BigDecimal(15))))),
+                Arguments.of("Origin account not found", new Event(EventType.TRANSFER, 300, 200, new BigDecimal(15)), Optional.empty())
         );
     }
 

@@ -24,10 +24,11 @@ public class RegistrationEventTest {
 
     private static Stream<Arguments> registerEvents() {
         return Stream.of(
-                Arguments.of("Create new account" , new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(new Account(100, BigDecimal.TEN)))),
-                Arguments.of("Take a new deposit", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN),  Optional.of(new EventResult(new Account(100, new BigDecimal(20))))),
-                Arguments.of("Withdraw the an account", new Event(EventType.WITHDRAW, null, 100, new BigDecimal(5)),  Optional.of(new EventResult(new Account(100, new BigDecimal(15))))),
-                Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, 200, new BigDecimal(5)), Optional.empty())
+                Arguments.of("Create new account", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account(100, BigDecimal.TEN)))),
+                Arguments.of("Take a new deposit", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account(100, new BigDecimal(20))))),
+                Arguments.of("Withdraw the an account", new Event(EventType.WITHDRAW, null, 100, new BigDecimal(5)), Optional.of(new EventResult(new Account(100, new BigDecimal(15)), null))),
+                Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, 200, new BigDecimal(5)), Optional.empty()),
+                Arguments.of("Transfer between two accounts", new Event(EventType.WITHDRAW, 100, 300, new BigDecimal(5)), Optional.of(new EventResult(new Account(100, new BigDecimal(0)), new Account(300, new BigDecimal(15)))))
         );
     }
 
@@ -48,8 +49,25 @@ public class RegistrationEventTest {
         var result = registrationEvent.add(fakeEvent);
 
         if (result.isPresent()) {
-            assertThat(expectedEventResult.get().getOrigin().getId(), equalTo(result.get().getOrigin().getId()));
-            assertThat(expectedEventResult.get().getOrigin().getBalance(), equalTo(result.get().getOrigin().getBalance()));
+            var expected = expectedEventResult.get();
+
+            if (expected.getDestination() != null && expected.getOrigin() != null) {
+                assertThat(expected.getOrigin().getId(), equalTo(result.get().getOrigin().getId()));
+                assertThat(expected.getOrigin().getBalance(), equalTo(result.get().getOrigin().getBalance()));
+
+                assertThat(expected.getDestination().getId(), equalTo(result.get().getDestination().getId()));
+                assertThat(expected.getDestination().getBalance(), equalTo(result.get().getDestination().getBalance()));
+            }
+
+            if (expected.getDestination() != null) {
+                assertThat(expected.getDestination().getId(), equalTo(result.get().getDestination().getId()));
+                assertThat(expected.getDestination().getBalance(), equalTo(result.get().getDestination().getBalance()));
+            }
+
+            if (expected.getOrigin() != null) {
+                assertThat(expected.getOrigin().getId(), equalTo(result.get().getOrigin().getId()));
+                assertThat(expected.getOrigin().getBalance(), equalTo(result.get().getOrigin().getBalance()));
+            }
         } else {
             assertThat(expectedEventResult.isEmpty(), is(true));
         }

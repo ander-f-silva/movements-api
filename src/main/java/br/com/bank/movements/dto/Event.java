@@ -18,9 +18,9 @@ public class Event {
     @JsonProperty("type")
     private EventType eventType;
 
-    private Integer destination;
+    private String destination;
 
-    private Integer origin;
+    private String origin;
 
     private BigDecimal amount;
 }

@@ -28,14 +28,14 @@ public class RegistrationEventTest {
                 Arguments.of("Take a new deposit", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account(100, new BigDecimal(20))))),
                 Arguments.of("Withdraw the an account", new Event(EventType.WITHDRAW, null, 100, new BigDecimal(5)), Optional.of(new EventResult(new Account(100, new BigDecimal(15)), null))),
                 Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, 200, new BigDecimal(5)), Optional.empty()),
-                Arguments.of("Transfer between two accounts", new Event(EventType.WITHDRAW, 100, 300, new BigDecimal(5)), Optional.of(new EventResult(new Account(100, new BigDecimal(0)), new Account(300, new BigDecimal(15)))))
+                Arguments.of("Transfer between two accounts", new Event(EventType.TRANSFER, 300, 100, new BigDecimal(15)), Optional.of(new EventResult(new Account(100, new BigDecimal(0)), new Account(300, new BigDecimal(15)))))
         );
     }
 
     @BeforeAll
     static void setUp() {
         var mockEventRepository = new MockEventRepository();
-        var movementOperation = new MovementOperationFactory(new DepositMovement(mockEventRepository), new WithdrawMovement(mockEventRepository), new HashMap<>());
+        var movementOperation = new MovementOperationFactory(new DepositMovement(mockEventRepository), new WithdrawMovement(mockEventRepository), new TransferMovement(mockEventRepository), new HashMap<>());
 
         movementOperation.init();
 
@@ -52,21 +52,21 @@ public class RegistrationEventTest {
             var expected = expectedEventResult.get();
 
             if (expected.getDestination() != null && expected.getOrigin() != null) {
-                assertThat(expected.getOrigin().getId(), equalTo(result.get().getOrigin().getId()));
-                assertThat(expected.getOrigin().getBalance(), equalTo(result.get().getOrigin().getBalance()));
+                assertThat(result.get().getOrigin().getId(), equalTo(expected.getOrigin().getId()));
+                assertThat(result.get().getOrigin().getBalance(), equalTo(expected.getOrigin().getBalance()));
 
-                assertThat(expected.getDestination().getId(), equalTo(result.get().getDestination().getId()));
-                assertThat(expected.getDestination().getBalance(), equalTo(result.get().getDestination().getBalance()));
+                assertThat(result.get().getDestination().getId(), equalTo(expected.getDestination().getId()));
+                assertThat(result.get().getDestination().getBalance(), equalTo(expected.getDestination().getBalance()));
             }
 
             if (expected.getDestination() != null) {
-                assertThat(expected.getDestination().getId(), equalTo(result.get().getDestination().getId()));
-                assertThat(expected.getDestination().getBalance(), equalTo(result.get().getDestination().getBalance()));
+                assertThat(result.get().getDestination().getId(), equalTo(expected.getDestination().getId()));
+                assertThat(result.get().getDestination().getBalance(), equalTo(expected.getDestination().getBalance()));
             }
 
             if (expected.getOrigin() != null) {
-                assertThat(expected.getOrigin().getId(), equalTo(result.get().getOrigin().getId()));
-                assertThat(expected.getOrigin().getBalance(), equalTo(result.get().getOrigin().getBalance()));
+                assertThat(result.get().getOrigin().getId(), equalTo(expected.getOrigin().getId()));
+                assertThat(result.get().getOrigin().getBalance(), equalTo(expected.getOrigin().getBalance()));
             }
         } else {
             assertThat(expectedEventResult.isEmpty(), is(true));
@@ -75,6 +75,13 @@ public class RegistrationEventTest {
 
     static class MockEventRepository implements EventRepository {
         private Map<Integer, List<Event>> mockData = new HashMap<>();
+
+        public MockEventRepository() {
+            var list = new ArrayList<Event>();
+            list.add( new Event(EventType.DEPOSIT, 0, null, BigDecimal.ZERO));
+
+            mockData.put(300, list);
+        }
 
         @Override
         public Event register(Integer accountId, Event event) {

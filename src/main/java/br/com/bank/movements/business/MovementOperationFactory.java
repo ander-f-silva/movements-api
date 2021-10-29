@@ -17,12 +17,16 @@ public class MovementOperationFactory {
     @Qualifier("withdrawMovement")
     private final MovementOperation withdrawMovement;
 
+    @Qualifier("transferMovement")
+    private final MovementOperation transferMovement;
+
     private Map<EventType, MovementOperation> movementOperation;
 
     @PostConstruct
     public void init() {
         movementOperation.put(EventType.DEPOSIT, depositMovement);
         movementOperation.put(EventType.WITHDRAW, withdrawMovement);
+        movementOperation.put(EventType.TRANSFER, transferMovement);
     }
 
     public MovementOperation get(EventType type) {

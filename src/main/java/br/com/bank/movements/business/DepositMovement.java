@@ -20,6 +20,6 @@ class DepositMovement implements MovementOperation {
 
         var eventsOfTheAccount = eventRepository.listEventsByAccount(event.getDestination());
 
-        return Optional.of(new EventResult(new Account(event.getDestination(), Balance.calculate(eventsOfTheAccount)))) ;
+        return Optional.of(new EventResult(null, new Account(event.getDestination(), Balance.calculate(eventsOfTheAccount))));
     }
 }

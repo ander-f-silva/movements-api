@@ -26,7 +26,7 @@ class WithdrawMovement implements MovementOperation {
 
            var eventsOfTheAccount = eventRepository.listEventsByAccount(event.getOrigin());
 
-           return Optional.of(new EventResult(new Account(event.getOrigin(), Balance.calculate(eventsOfTheAccount))));
+           return Optional.of(new EventResult(new Account(event.getOrigin(), Balance.calculate(eventsOfTheAccount)), null));
        } else {
            return Optional.empty();
        }

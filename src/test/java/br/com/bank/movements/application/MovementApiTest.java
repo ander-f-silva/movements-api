@@ -33,12 +33,12 @@ class MovementApiTest {
 
     private static Stream<Arguments> registerEvents() {
         return Stream.of(
-                Arguments.of("Create new account", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), new EventResult(null, new Account(100, BigDecimal.TEN)), HttpStatus.CREATED),
-                Arguments.of("Does a new deposit", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), new EventResult(null, new Account(100, new BigDecimal(20))), HttpStatus.CREATED),
-                Arguments.of("Withdraw the an account", new Event(EventType.WITHDRAW, null, 100, new BigDecimal(5)), new EventResult(new Account(100, new BigDecimal(15)), null), HttpStatus.CREATED),
-                Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, 200, new BigDecimal(5)), null, HttpStatus.NOT_FOUND),
-                Arguments.of("Transfer between two accounts", new Event(EventType.TRANSFER, 300, 100, new BigDecimal(15)), new EventResult(new Account(100, new BigDecimal(0)), new Account(300, new BigDecimal(15))), HttpStatus.CREATED),
-                Arguments.of("Origin account not found", new Event(EventType.TRANSFER, 300, 200, new BigDecimal(15)), null, HttpStatus.NOT_FOUND)
+                Arguments.of("Create new account", new Event(EventType.DEPOSIT, "100", null, BigDecimal.TEN), new EventResult(null, new Account("100", BigDecimal.TEN)), HttpStatus.CREATED),
+                Arguments.of("Does a new deposit", new Event(EventType.DEPOSIT, "100", null, BigDecimal.TEN), new EventResult(null, new Account("100", new BigDecimal(20))), HttpStatus.CREATED),
+                Arguments.of("Withdraw the an account", new Event(EventType.WITHDRAW, null, "100", new BigDecimal(5)), new EventResult(new Account("100", new BigDecimal(15)), null), HttpStatus.CREATED),
+                Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, "200", new BigDecimal(5)), null, HttpStatus.NOT_FOUND),
+                Arguments.of("Transfer between two accounts", new Event(EventType.TRANSFER, "300", "100", new BigDecimal(15)), new EventResult(new Account("100", new BigDecimal(0)), new Account("300", new BigDecimal(15))), HttpStatus.CREATED),
+                Arguments.of("Origin account not found", new Event(EventType.TRANSFER, "300", "200", new BigDecimal(15)), null, HttpStatus.NOT_FOUND)
         );
     }
 

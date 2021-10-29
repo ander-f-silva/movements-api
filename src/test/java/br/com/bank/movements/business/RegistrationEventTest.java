@@ -24,12 +24,12 @@ public class RegistrationEventTest {
 
     private static Stream<Arguments> registerEvents() {
         return Stream.of(
-                Arguments.of("Create new account", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account(100, BigDecimal.TEN)))),
-                Arguments.of("Does a new deposit", new Event(EventType.DEPOSIT, 100, null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account(100, new BigDecimal(20))))),
-                Arguments.of("Withdraw the an account", new Event(EventType.WITHDRAW, null, 100, new BigDecimal(5)), Optional.of(new EventResult(new Account(100, new BigDecimal(15)), null))),
-                Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, 200, new BigDecimal(5)), Optional.empty()),
-                Arguments.of("Transfer between two accounts", new Event(EventType.TRANSFER, 300, 100, new BigDecimal(15)), Optional.of(new EventResult(new Account(100, new BigDecimal(0)), new Account(300, new BigDecimal(15))))),
-                Arguments.of("Origin account not found", new Event(EventType.TRANSFER, 300, 200, new BigDecimal(15)), Optional.empty())
+                Arguments.of("Create new account", new Event(EventType.DEPOSIT, "100", null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account("100", BigDecimal.TEN)))),
+                Arguments.of("Does a new deposit", new Event(EventType.DEPOSIT, "100", null, BigDecimal.TEN), Optional.of(new EventResult(null, new Account("100", new BigDecimal(20))))),
+                Arguments.of("Withdraw the an account", new Event(EventType.WITHDRAW, null, "100", new BigDecimal(5)), Optional.of(new EventResult(new Account("100", new BigDecimal(15)), null))),
+                Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, "200", new BigDecimal(5)), Optional.empty()),
+                Arguments.of("Transfer between two accounts", new Event(EventType.TRANSFER, "300", "100", new BigDecimal(15)), Optional.of(new EventResult(new Account("100", new BigDecimal(0)), new Account("300", new BigDecimal(15))))),
+                Arguments.of("Origin account not found", new Event(EventType.TRANSFER, "300", "200", new BigDecimal(15)), Optional.empty())
         );
     }
 
@@ -75,17 +75,17 @@ public class RegistrationEventTest {
     }
 
     static class MockEventRepository implements EventRepository {
-        private Map<Integer, List<Event>> mockData = new HashMap<>();
+        private Map<String, List<Event>> mockData = new HashMap<>();
 
         public MockEventRepository() {
             var list = new ArrayList<Event>();
-            list.add( new Event(EventType.DEPOSIT, 0, null, BigDecimal.ZERO));
+            list.add( new Event(EventType.DEPOSIT, "300", null, BigDecimal.ZERO));
 
-            mockData.put(300, list);
+            mockData.put("300", list);
         }
 
         @Override
-        public Event register(Integer accountId, Event event) {
+        public Event register(String accountId, Event event) {
             if (mockData.containsKey(accountId)) {
                 mockData.get(accountId).add(event);
             } else {
@@ -99,12 +99,12 @@ public class RegistrationEventTest {
         }
 
         @Override
-        public List<Event> listEventsByAccount(Integer id) {
+        public List<Event> listEventsByAccount(String id) {
             return mockData.get(id);
         }
 
         @Override
-        public boolean exists(Integer accountId) {
+        public boolean exists(String accountId) {
             return mockData.containsKey(accountId);
         }
     }

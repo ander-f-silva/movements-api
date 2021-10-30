@@ -4,7 +4,6 @@ import br.com.bank.movements.dto.Account;
 import br.com.bank.movements.dto.Event;
 import br.com.bank.movements.dto.EventResult;
 import br.com.bank.movements.dto.EventType;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.test.util.AssertionErrors;
 
 import java.math.BigDecimal;
 import java.util.stream.Stream;
@@ -49,13 +49,12 @@ class MovementApiTest {
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         HttpEntity<Event> entity = new HttpEntity<>(newEvent, headers);
-        ResponseEntity<EventResult> response = restTemplate.postForEntity("http://localhost:" + port + "/event", entity, EventResult.class);
 
-        assertThat(response.getStatusCode(), Matchers.is(httpStatus));
+        if (httpStatus.is2xxSuccessful()) {
+            ResponseEntity<EventResult> response = restTemplate.postForEntity("http://localhost:" + port + "/event", entity, EventResult.class);
 
-        var eventResult = response.getBody();
+            var eventResult = response.getBody();
 
-        if (eventResult != null) {
             if (expectedEventResult.getDestination() != null && expectedEventResult.getOrigin() != null) {
                 assertThat(eventResult.getOrigin().getId(), equalTo(expectedEventResult.getOrigin().getId()));
                 assertThat(eventResult.getOrigin().getBalance(), equalTo(expectedEventResult.getOrigin().getBalance()));
@@ -73,6 +72,20 @@ class MovementApiTest {
                 assertThat(eventResult.getOrigin().getId(), equalTo(expectedEventResult.getOrigin().getId()));
                 assertThat(eventResult.getOrigin().getBalance(), equalTo(expectedEventResult.getOrigin().getBalance()));
             }
+
+            return;
         }
+
+        if (httpStatus.is4xxClientError()) {
+            ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:" + port + "/event", entity, String.class);
+
+            var notFoundReturn = response.getBody();
+
+            assertThat(notFoundReturn, equalTo("0"));
+
+            return;
+        }
+
+        AssertionErrors.fail("Fail in execute tests");
     }
 }

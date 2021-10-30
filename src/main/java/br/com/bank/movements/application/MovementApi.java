@@ -18,10 +18,12 @@ import java.util.Optional;
 @AllArgsConstructor
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class MovementApi {
+    public static final String NOT_FOUND_RETURN = "0";
+
     private final RegistrationEvent registrationEvent;
 
     @PostMapping(value = "/event")
-    public ResponseEntity<EventResult> registerEvent(@RequestBody Event newEvent) {
+    public ResponseEntity<?> registerEvent(@RequestBody Event newEvent) {
         Optional<EventResult> eventResult = registrationEvent.add(newEvent);
 
         if (eventResult.isPresent()) {
@@ -29,7 +31,7 @@ public class MovementApi {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(valueEventsResult);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NOT_FOUND_RETURN);
         }
     }
 }

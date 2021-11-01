@@ -4,6 +4,7 @@ import br.com.bank.movements.dto.Account;
 import br.com.bank.movements.dto.Event;
 import br.com.bank.movements.dto.EventResult;
 import br.com.bank.movements.dto.EventType;
+import br.com.bank.movements.repository.EventRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.test.util.AssertionErrors;
 
 import java.math.BigDecimal;
@@ -25,6 +27,9 @@ import static org.hamcrest.Matchers.equalTo;
 class MovementApiTest {
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private EventRepository eventRepository;
 
     @LocalServerPort
     private Integer port;
@@ -39,6 +44,13 @@ class MovementApiTest {
                 Arguments.of("Account not found", new Event(EventType.WITHDRAW, null, "200", new BigDecimal(5)), null, HttpStatus.NOT_FOUND),
                 Arguments.of("Transfer between two accounts", new Event(EventType.TRANSFER, "300", "100", new BigDecimal(15)), new EventResult(new Account("100", new BigDecimal(0)), new Account("300", new BigDecimal(15))), HttpStatus.CREATED),
                 Arguments.of("Origin account not found", new Event(EventType.TRANSFER, "300", "200", new BigDecimal(15)), null, HttpStatus.NOT_FOUND)
+        );
+    }
+
+    private static Stream<Arguments> getBalance() {
+        return Stream.of(
+                Arguments.of("Get balance with success", "150", BigDecimal.TEN, HttpStatus.OK),
+                Arguments.of("Account not found", "200", BigDecimal.ZERO,  HttpStatus.NOT_FOUND)
         );
     }
 
@@ -87,5 +99,17 @@ class MovementApiTest {
         }
 
         AssertionErrors.fail("Fail in execute tests");
+    }
+
+    @ParameterizedTest(name = "{index} {0}")
+    @MethodSource("getBalance")
+    @DisplayName("should get balance of a account")
+    void testGetBalance(String title, String fakeAccountId, BigDecimal expectedBalance, HttpStatus httpStatus) {
+        eventRepository.register("150", new Event(EventType.DEPOSIT, "150", null, BigDecimal.TEN));
+
+        ResponseEntity<BigDecimal> response = restTemplate.getForEntity("http://localhost:" + port + "/balance?account_id=" + fakeAccountId, BigDecimal.class);
+
+        assertThat(response.getStatusCode(), equalTo(httpStatus));
+        assertThat(response.getBody(), equalTo(expectedBalance));
     }
 }

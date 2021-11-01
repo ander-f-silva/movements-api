@@ -40,4 +40,9 @@ public class MockEventRepository implements EventRepository {
     public boolean exists(String accountId) {
         return mockData.containsKey(accountId);
     }
+
+    @Override
+    public void clear() {
+        mockData.clear();
+    }
 }

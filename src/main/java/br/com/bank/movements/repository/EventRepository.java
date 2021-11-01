@@ -10,4 +10,6 @@ public interface EventRepository {
     List<Event> listEventsByAccount(String id);
 
     boolean exists(String accountId);
+
+    void clear();
 }

@@ -35,7 +35,12 @@ public class RegistrationEventTest {
 
     @BeforeAll
     static void setUp() {
-        var mockEventRepository = new MockEventRepository();
+        var fakeAccountId = "300";
+
+        var list = new ArrayList<Event>();
+        list.add( new Event(EventType.DEPOSIT, fakeAccountId, null, BigDecimal.ZERO));
+
+        var mockEventRepository = new MockEventRepository(fakeAccountId, list);
         var movementOperation = new MovementOperationFactory(new DepositMovement(mockEventRepository), new WithdrawMovement(mockEventRepository), new TransferMovement(mockEventRepository), new HashMap<>());
 
         movementOperation.init();

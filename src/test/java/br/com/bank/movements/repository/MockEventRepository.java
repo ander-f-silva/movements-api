@@ -13,11 +13,8 @@ import java.util.Map;
 public class MockEventRepository implements EventRepository {
     private Map<String, List<Event>> mockData = new HashMap<>();
 
-    public MockEventRepository() {
-        var list = new ArrayList<Event>();
-        list.add( new Event(EventType.DEPOSIT, "300", null, BigDecimal.ZERO));
-
-        mockData.put("300", list);
+    public MockEventRepository(String accountId, List<Event> list) {
+        mockData.put(accountId, list);
     }
 
     @Override

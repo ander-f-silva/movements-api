@@ -38,4 +38,9 @@ class EventDao implements EventRepository {
     public boolean exists(String accountId) {
         return data.containsKey(accountId);
     }
+
+    @Override
+    public void clear() {
+        data.clear();
+    }
 }

@@ -6,6 +6,7 @@ import br.com.bank.movements.dto.EventResult;
 import br.com.bank.movements.dto.EventType;
 import br.com.bank.movements.repository.EventRepository;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MovementApiTest {
@@ -111,5 +113,22 @@ class MovementApiTest {
 
         assertThat(response.getStatusCode(), equalTo(httpStatus));
         assertThat(response.getBody(), equalTo(expectedBalance));
+    }
+
+    @Test
+    @DisplayName("should get balance of a account")
+    void testReset() {
+        eventRepository.register("150", new Event(EventType.DEPOSIT, "150", null, BigDecimal.TEN));
+
+        assertThat(eventRepository.listEventsByAccount("150").size(), equalTo(1));
+
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+
+        HttpEntity<Event> entity = new HttpEntity<>(null, headers);
+
+        ResponseEntity<Void> response = restTemplate.postForEntity("http://localhost:" + port + "/reset", entity, Void.class);
+
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+        assertThat(eventRepository.listEventsByAccount("150"), nullValue());
     }
 }

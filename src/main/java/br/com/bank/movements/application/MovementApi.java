@@ -4,6 +4,7 @@ import br.com.bank.movements.business.GetBalance;
 import br.com.bank.movements.business.RegistrationEvent;
 import br.com.bank.movements.dto.Event;
 import br.com.bank.movements.dto.EventResult;
+import br.com.bank.movements.repository.EventRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class MovementApi {
 
     private final RegistrationEvent registrationEvent;
     private final GetBalance getBalance;
+    private final EventRepository eventRepository;
 
     @PostMapping(value = "/event")
     public ResponseEntity<?> registerEvent(@RequestBody Event newEvent) {
@@ -54,5 +56,14 @@ public class MovementApi {
             logger.info("[action: 'GET_BALANCE'][query_string:(account_id: {})] Account not found", accountId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(BigDecimal.ZERO);
         }
+    }
+
+    @PostMapping(value = "/reset")
+    public ResponseEntity<Void> reset() {
+        eventRepository.clear();
+
+        logger.info("[action: 'RESET_DATA'] Clean data");
+
+        return ResponseEntity.ok().build();
     }
 }

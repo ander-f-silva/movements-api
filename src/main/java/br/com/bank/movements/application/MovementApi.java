@@ -22,7 +22,10 @@ import java.util.Optional;
 public class MovementApi {
     public static Logger logger = LoggerFactory.getLogger(MovementApi.class);
 
-    public static final String NOT_FOUND_RETURN = "0";
+    public static final BigDecimal NOT_FOUND_RETURN = BigDecimal.ZERO;
+
+    public static final String SUCCESS_RESET = "OK";
+
 
     private final RegistrationEvent registrationEvent;
     private final GetBalance getBalance;
@@ -59,11 +62,11 @@ public class MovementApi {
     }
 
     @PostMapping(value = "/reset")
-    public ResponseEntity<Void> reset() {
+    public ResponseEntity<String> reset() {
         eventRepository.clear();
 
         logger.info("[action: 'RESET_DATA'] Clean data");
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(SUCCESS_RESET);
     }
 }

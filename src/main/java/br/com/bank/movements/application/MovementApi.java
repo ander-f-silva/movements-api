@@ -24,7 +24,7 @@ public class MovementApi {
 
     public static final BigDecimal NOT_FOUND_RETURN = BigDecimal.ZERO;
 
-    public static final String SUCCESS_RESET = "0K";
+    public static final String SUCCESS_RESET = "OK";
 
 
     private final RegistrationEvent registrationEvent;

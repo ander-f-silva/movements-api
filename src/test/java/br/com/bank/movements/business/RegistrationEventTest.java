@@ -4,7 +4,7 @@ import br.com.bank.movements.dto.Account;
 import br.com.bank.movements.dto.Event;
 import br.com.bank.movements.dto.EventResult;
 import br.com.bank.movements.dto.EventType;
-import br.com.bank.movements.repository.EventRepository;
+import br.com.bank.movements.repository.MockEventRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,41 +71,6 @@ public class RegistrationEventTest {
             }
         } else {
             assertThat(expectedEventResult.isEmpty(), is(true));
-        }
-    }
-
-    static class MockEventRepository implements EventRepository {
-        private Map<String, List<Event>> mockData = new HashMap<>();
-
-        public MockEventRepository() {
-            var list = new ArrayList<Event>();
-            list.add( new Event(EventType.DEPOSIT, "300", null, BigDecimal.ZERO));
-
-            mockData.put("300", list);
-        }
-
-        @Override
-        public Event register(String accountId, Event event) {
-            if (mockData.containsKey(accountId)) {
-                mockData.get(accountId).add(event);
-            } else {
-                var list = new ArrayList<Event>();
-                list.add(event);
-
-                mockData.put(accountId, list);
-            }
-
-            return event;
-        }
-
-        @Override
-        public List<Event> listEventsByAccount(String id) {
-            return mockData.get(id);
-        }
-
-        @Override
-        public boolean exists(String accountId) {
-            return mockData.containsKey(accountId);
         }
     }
 }

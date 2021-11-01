@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.test.util.AssertionErrors;
 
 import java.math.BigDecimal;
@@ -52,7 +51,7 @@ class MovementApiTest {
     private static Stream<Arguments> getBalance() {
         return Stream.of(
                 Arguments.of("Get balance with success", "150", BigDecimal.TEN, HttpStatus.OK),
-                Arguments.of("Account not found", "200", BigDecimal.ZERO,  HttpStatus.NOT_FOUND)
+                Arguments.of("Account not found", "200", BigDecimal.ZERO, HttpStatus.NOT_FOUND)
         );
     }
 
@@ -116,7 +115,7 @@ class MovementApiTest {
     }
 
     @Test
-    @DisplayName("should get balance of a account")
+    @DisplayName("should reset all data")
     void testReset() {
         eventRepository.register("150", new Event(EventType.DEPOSIT, "150", null, BigDecimal.TEN));
 
@@ -126,9 +125,11 @@ class MovementApiTest {
 
         HttpEntity<Event> entity = new HttpEntity<>(null, headers);
 
-        ResponseEntity<Void> response = restTemplate.postForEntity("http://localhost:" + port + "/reset", entity, Void.class);
+        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:" + port + "/reset", entity, String.class);
 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+        assertThat(response.getBody(), equalTo("OK"));
+
         assertThat(eventRepository.listEventsByAccount("150"), nullValue());
     }
 }
